@@ -96,3 +96,4 @@ def atualizar_graficos(veiculo_selecionado):
 # Rodar o servidor Dash
 if __name__ == '__main__':
     app.run(debug=True)
+    
