@@ -41,13 +41,15 @@ app.title = "Dashboard - Montenegro Business e Participações"
 
 # Layout do Dashboard
 app.layout = html.Div([  
-    html.H1("Montenegro Business e Participações", style={'textAlign': 'center', 'color': 'white', 'fontSize': '32px', 'fontWeight': 'bold'}),
-    html.H2("Dashboard de Gestão de Manutenção", style={'textAlign': 'center', 'color': 'white', 'marginBottom': '30px'}),
+    html.H1("Montenegro Business e Participações", style={
+        'textAlign': 'center', 'color': 'white', 'fontSize': '36px', 'fontWeight': '600', 'fontFamily': 'Arial, sans-serif'}),
+    html.H2("Dashboard de Gestão de Manutenção", style={
+        'textAlign': 'center', 'color': 'white', 'marginBottom': '30px', 'fontFamily': 'Arial, sans-serif', 'fontWeight': '500'}),
 
     dcc.Tabs(id="tabs", value="geral", children=[
-        dcc.Tab(label="Visão Geral", value="geral", style={'backgroundColor': '#1E1E1E', 'color': 'white'}),
-        dcc.Tab(label="Frota Leve", value="leve", style={'backgroundColor': '#1E1E1E', 'color': 'white'}),
-        dcc.Tab(label="Frota Pesada", value="pesada", style={'backgroundColor': '#1E1E1E', 'color': 'white'}),
+        dcc.Tab(label="Visão Geral", value="geral", style={'backgroundColor': '#1E1E1E', 'color': 'white', 'fontFamily': 'Arial, sans-serif'}),
+        dcc.Tab(label="Frota Leve", value="leve", style={'backgroundColor': '#1E1E1E', 'color': 'white', 'fontFamily': 'Arial, sans-serif'}),
+        dcc.Tab(label="Frota Pesada", value="pesada", style={'backgroundColor': '#1E1E1E', 'color': 'white', 'fontFamily': 'Arial, sans-serif'}),
     ]),
     
     html.Div(id="tab-content")
@@ -62,19 +64,23 @@ def atualizar_pagina(aba_selecionada):
     if aba_selecionada == "geral":
         return html.Div([ 
             dcc.Graph(figure=px.pie(df_manutencao, names='TIPO', values='VALOR PAGO', title="Gastos Totais por Tipo", 
-                                   color='TIPO', color_discrete_map={'REVISÃO': '#FF6347', 'PNEU': '#4682B4', 'OUTRO': '#32CD32'})),
+                                   color='TIPO', color_discrete_map={'REVISÃO': '#FF6347', 'PNEU': '#4682B4', 'OUTRO': '#32CD32'}),
+                          style={'backgroundColor': '#333333', 'padding': '20px', 'borderRadius': '10px'}),
             dcc.Graph(figure=px.line(df_manutencao, x='DATA', y='VALOR PAGO', title="Evolução dos Gastos", 
-                                    line_shape='linear', markers=True, template="plotly_dark")),
+                                    line_shape='linear', markers=True, template="plotly_dark"),
+                      style={'backgroundColor': '#333333', 'padding': '20px', 'borderRadius': '10px'}),
         ])
     elif aba_selecionada == "leve":
         return html.Div([ 
             dcc.Graph(figure=px.bar(df_frota_leve, x='VEÍCULOS', y='VALOR PAGO', title="Frota Leve - Gastos por Veículo", 
-                                   color='VEÍCULOS', color_continuous_scale='Viridis', template="plotly_dark")),
+                                   color='VEÍCULOS', color_continuous_scale='Viridis', template="plotly_dark"),
+                          style={'backgroundColor': '#333333', 'padding': '20px', 'borderRadius': '10px'}),
         ])
     elif aba_selecionada == "pesada":
         return html.Div([ 
             dcc.Graph(figure=px.bar(df_frota_pesada, x='VEÍCULOS', y='VALOR PAGO', title="Frota Pesada - Gastos por Veículo", 
-                                   color='VEÍCULOS', color_continuous_scale='Viridis', template="plotly_dark")),
+                                   color='VEÍCULOS', color_continuous_scale='Viridis', template="plotly_dark"),
+                          style={'backgroundColor': '#333333', 'padding': '20px', 'borderRadius': '10px'}),
         ])
 
 # Rodar o servidor Dash
