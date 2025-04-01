@@ -1,5 +1,5 @@
 import dash
-from dash import dcc, html, dash_table
+from dash import dcc, html
 from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
@@ -8,63 +8,70 @@ import os
 # Caminho para o arquivo Excel
 darq = 'GESTÃO MANUTENÇÃO.xlsx'
 
-# Carregar o DataFrame corretamente
-df_manutencao = pd.read_excel(darq, sheet_name="MANUTENÇÃO POR VEÍCULO", engine="openpyxl", skiprows=2)
-df_manutencao = df_manutencao.dropna(how="all")
-df_manutencao.columns = df_manutencao.iloc[0].astype(str).str.strip().str.upper()
-df_manutencao = df_manutencao[1:].reset_index(drop=True)
+# Carregar o DataFrame corretamente e padronizar colunas
+try:
+    df_manutencao = pd.read_excel(darq, sheet_name="MANUTENÇÃO POR VEÍCULO", engine="openpyxl", skiprows=2)
+    df_manutencao = df_manutencao.dropna(how="all")
+    df_manutencao.columns = df_manutencao.iloc[0].astype(str).str.strip().str.upper()  # Padrão MAIÚSCULAS e sem espaços
+    df_manutencao = df_manutencao[1:].reset_index(drop=True)
+except Exception as e:
+    print(f"Erro ao carregar a planilha: {e}")
+    exit()
 
-# Convertendo colunas numéricas
+# Verificar se todas as colunas necessárias estão presentes
+colunas_esperadas = ['VEÍCULOS', 'VALOR PAGO', 'VALOR ECONOMIZADO', 'TIPO', 'CATEGORIA', 'DATA']
+for coluna in colunas_esperadas:
+    if coluna not in df_manutencao.columns:
+        print(f"ERRO: A coluna '{coluna}' não foi encontrada na planilha! Verifique o nome exato.")
+        print("Colunas disponíveis:", df_manutencao.columns.tolist())
+        exit()
+
+# Converter colunas numéricas
 for col in ['VALOR PAGO', 'VALOR ECONOMIZADO']:
     df_manutencao[col] = pd.to_numeric(df_manutencao[col], errors='coerce').fillna(0)
 
-# Adicionando coluna de data corretamente
-df_manutencao['DATA'] = pd.to_datetime(df_manutencao['DATA'], errors='coerce')
-
-# Separação das frotas
+# Criar DataFrames separados para frota leve e pesada
 df_frota_leve = df_manutencao[df_manutencao['CATEGORIA'] == 'LEVE']
 df_frota_pesada = df_manutencao[df_manutencao['CATEGORIA'] == 'PESADA']
 
 # Inicializar aplicativo Dash
-app = dash.Dash(__name__, suppress_callback_exceptions=True)
-server = app.server
-app.title = "Dashboard - Montenegro Business"
+app = dash.Dash(__name__)
+server = app.server  # Para rodar no Render
+app.title = "Dashboard - Montenegro Business e Participações"
 
 # Layout do Dashboard
 app.layout = html.Div([
-    html.H1("Montenegro Business e Participações", style={'textAlign': 'center', 'color': '#FFD700', 'fontSize': '36px'}),
-    dcc.Tabs(id="tabs", value='geral', children=[
-        dcc.Tab(label='Frota Geral', value='geral', style={'backgroundColor': '#1E1E1E', 'color': '#FFD700'}),
-        dcc.Tab(label='Frota Leve', value='leve', style={'backgroundColor': '#1E1E1E', 'color': '#FFD700'}),
-        dcc.Tab(label='Frota Pesada', value='pesada', style={'backgroundColor': '#1E1E1E', 'color': '#FFD700'})
-    ], colors={"border": "#FFD700", "primary": "#FFD700", "background": "#121212"}),
-    html.Div(id='tabs-content')
-], style={'backgroundColor': '#121212', 'padding': '20px'})
+    html.H1("Montenegro Business e Participações", style={'textAlign': 'center', 'color': 'white', 'fontSize': '32px', 'fontWeight': 'bold'}),
+    html.H2("Dashboard de Gestão de Manutenção", style={'textAlign': 'center', 'color': 'white', 'marginBottom': '30px'}),
 
-# Callback para atualizar abas
-def render_tab(tab):
-    if tab == 'geral':
-        return html.Div([
-            dcc.DatePickerRange(
-                id='date-picker',
-                start_date=df_manutencao['DATA'].min(),
-                end_date=df_manutencao['DATA'].max(),
-                display_format='DD/MM/YYYY'
-            ),
-            dcc.Graph(id='graph-geral')
-        ])
-    elif tab == 'leve':
-        return html.Div([
-            dcc.Graph(id='graph-leve', figure=px.bar(df_frota_leve, x='VEÍCULOS', y='VALOR PAGO', title='Gastos Frota Leve', color='VEÍCULOS'))
-        ])
-    elif tab == 'pesada':
-        return html.Div([
-            dcc.Graph(id='graph-pesada', figure=px.bar(df_frota_pesada, x='VEÍCULOS', y='VALOR PAGO', title='Gastos Frota Pesada', color='VEÍCULOS'))
-        ])
+    dcc.Tabs(id="tabs", value="geral", children=[
+        dcc.Tab(label="Visão Geral", value="geral", style={'backgroundColor': '#1E1E1E', 'color': 'white'}),
+        dcc.Tab(label="Frota Leve", value="leve", style={'backgroundColor': '#1E1E1E', 'color': 'white'}),
+        dcc.Tab(label="Frota Pesada", value="pesada", style={'backgroundColor': '#1E1E1E', 'color': 'white'}),
+    ]),
+    
+    html.Div(id="tab-content")
+], style={'backgroundColor': '#111111', 'padding': '30px'})
 
-@app.callback(Output('tabs-content', 'children'), [Input('tabs', 'value')])
-def update_tab(tab):
-    return render_tab(tab)
+# Callback para atualizar os gráficos conforme a aba selecionada
+@app.callback(
+    Output("tab-content", "children"),
+    Input("tabs", "value")
+)
+def atualizar_pagina(aba_selecionada):
+    if aba_selecionada == "geral":
+        return html.Div([
+            dcc.Graph(figure=px.pie(df_manutencao, names='TIPO', values='VALOR PAGO', title="Gastos Totais por Tipo")),
+            dcc.Graph(figure=px.line(df_manutencao, x='DATA', y='VALOR PAGO', title="Evolução dos Gastos")),
+        ])
+    elif aba_selecionada == "leve":
+        return html.Div([
+            dcc.Graph(figure=px.bar(df_frota_leve, x='VEÍCULOS', y='VALOR PAGO', title="Frota Leve - Gastos por Veículo")),
+        ])
+    elif aba_selecionada == "pesada":
+        return html.Div([
+            dcc.Graph(figure=px.bar(df_frota_pesada, x='VEÍCULOS', y='VALOR PAGO', title="Frota Pesada - Gastos por Veículo")),
+        ])
 
 # Rodar o servidor Dash
 if __name__ == '__main__':
