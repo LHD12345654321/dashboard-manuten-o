@@ -40,7 +40,7 @@ server = app.server  # Para rodar no Render
 app.title = "Dashboard - Montenegro Business e Participações"
 
 # Layout do Dashboard
-app.layout = html.Div([
+app.layout = html.Div([  
     html.H1("Montenegro Business e Participações", style={'textAlign': 'center', 'color': 'white', 'fontSize': '32px', 'fontWeight': 'bold'}),
     html.H2("Dashboard de Gestão de Manutenção", style={'textAlign': 'center', 'color': 'white', 'marginBottom': '30px'}),
 
@@ -60,17 +60,21 @@ app.layout = html.Div([
 )
 def atualizar_pagina(aba_selecionada):
     if aba_selecionada == "geral":
-        return html.Div([
-            dcc.Graph(figure=px.pie(df_manutencao, names='TIPO', values='VALOR PAGO', title="Gastos Totais por Tipo")),
-            dcc.Graph(figure=px.line(df_manutencao, x='DATA', y='VALOR PAGO', title="Evolução dos Gastos")),
+        return html.Div([ 
+            dcc.Graph(figure=px.pie(df_manutencao, names='TIPO', values='VALOR PAGO', title="Gastos Totais por Tipo", 
+                                   color='TIPO', color_discrete_map={'REVISÃO': '#FF6347', 'PNEU': '#4682B4', 'OUTRO': '#32CD32'})),
+            dcc.Graph(figure=px.line(df_manutencao, x='DATA', y='VALOR PAGO', title="Evolução dos Gastos", 
+                                    line_shape='linear', markers=True, template="plotly_dark")),
         ])
     elif aba_selecionada == "leve":
-        return html.Div([
-            dcc.Graph(figure=px.bar(df_frota_leve, x='VEÍCULOS', y='VALOR PAGO', title="Frota Leve - Gastos por Veículo")),
+        return html.Div([ 
+            dcc.Graph(figure=px.bar(df_frota_leve, x='VEÍCULOS', y='VALOR PAGO', title="Frota Leve - Gastos por Veículo", 
+                                   color='VEÍCULOS', color_continuous_scale='Viridis', template="plotly_dark")),
         ])
     elif aba_selecionada == "pesada":
-        return html.Div([
-            dcc.Graph(figure=px.bar(df_frota_pesada, x='VEÍCULOS', y='VALOR PAGO', title="Frota Pesada - Gastos por Veículo")),
+        return html.Div([ 
+            dcc.Graph(figure=px.bar(df_frota_pesada, x='VEÍCULOS', y='VALOR PAGO', title="Frota Pesada - Gastos por Veículo", 
+                                   color='VEÍCULOS', color_continuous_scale='Viridis', template="plotly_dark")),
         ])
 
 # Rodar o servidor Dash
