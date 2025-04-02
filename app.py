@@ -1,11 +1,10 @@
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc, html
 import pandas as pd
 import plotly.express as px
 
 # Carregar os dados
-file_path = r"C:\\Users\\lucas\\Desktop\\Recoil\\dados_manutencao.xlsx"
+file_path = "dados_manutencao.xlsx"
 df = pd.read_excel(file_path, sheet_name='MANUTENÇÃO POR VEÍCULO')
 
 # Criar colunas derivadas para melhor análise
