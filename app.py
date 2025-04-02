@@ -1,88 +1,59 @@
 import dash
-from dash import dcc, html
+import dash_core_components as dcc
+import dash_html_components as html
 from dash.dependencies import Input, Output
-import plotly.express as px
 import pandas as pd
+import plotly.express as px
 import os
 
-# Caminho para o arquivo Excel
-darq = 'GESTÃO MANUTENÇÃO.xlsx'
+# Carregar os dados da planilha Excel
+file_path = "data.xlsx"  # Atualize conforme necessário
+df = pd.read_excel(file_path, sheet_name='MANUTENÇÃO POR VEÍCULO')
 
-# Carregar o DataFrame corretamente e padronizar colunas
-try:
-    df_manutencao = pd.read_excel(darq, sheet_name="MANUTENÇÃO POR VEÍCULO", engine="openpyxl", skiprows=2)
-    df_manutencao = df_manutencao.dropna(how="all")
-    df_manutencao.columns = df_manutencao.iloc[0].astype(str).str.strip().str.upper()
-    df_manutencao = df_manutencao[1:].reset_index(drop=True)
-except Exception as e:
-    print(f"Erro ao carregar a planilha: {e}")
-    exit()
+# Inicializar o aplicativo Dash
+app = dash.Dash(__name__, suppress_callback_exceptions=True)
+server = app.server  # Necessário para implantação no Render
 
-# Verificar se todas as colunas necessárias estão presentes
-colunas_esperadas = ['VEÍCULOS', 'VALOR PAGO', 'VALOR ECONOMIZADO', 'TIPO', 'CATEGORIA', 'DATA']
-for coluna in colunas_esperadas:
-    if coluna not in df_manutencao.columns:
-        print(f"ERRO: A coluna '{coluna}' não foi encontrada na planilha! Verifique o nome exato.")
-        print("Colunas disponíveis:", df_manutencao.columns.tolist())
-        exit()
+# Estilo atualizado para um design moderno e profissional
+theme = {
+    'background': '#121212',
+    'text': '#E0E0E0',
+    'primary': '#BB86FC',
+    'secondary': '#03DAC6',
+    'highlight': '#3700B3'
+}
 
-# Converter colunas numéricas
-for col in ['VALOR PAGO', 'VALOR ECONOMIZADO']:
-    df_manutencao[col] = pd.to_numeric(df_manutencao[col], errors='coerce').fillna(0)
-
-# Criar DataFrames separados para frota leve e pesada
-df_frota_leve = df_manutencao[df_manutencao['CATEGORIA'] == 'LEVE']
-df_frota_pesada = df_manutencao[df_manutencao['CATEGORIA'] == 'PESADA']
-
-# Inicializar aplicativo Dash
-app = dash.Dash(__name__)
-server = app.server  # Para rodar no Render
-app.title = "Dashboard - Montenegro Business e Participações"
-
-# Layout do Dashboard
-app.layout = html.Div([
-    html.H1("Montenegro Business e Participações", style={
-        'textAlign': 'center', 'color': '#FFD700', 'fontSize': '36px', 'fontWeight': 'bold', 'fontFamily': 'Arial, sans-serif'}),
-    html.H2("Dashboard de Gestão de Manutenção", style={
-        'textAlign': 'center', 'color': 'white', 'marginBottom': '30px', 'fontFamily': 'Arial, sans-serif', 'fontWeight': '500'}),
-
-    dcc.Tabs(id="tabs", value="geral", children=[
-        dcc.Tab(label="Visão Geral", value="geral", style={'backgroundColor': '#333333', 'color': 'white', 'fontFamily': 'Arial, sans-serif'}),
-        dcc.Tab(label="Frota Leve", value="leve", style={'backgroundColor': '#333333', 'color': 'white', 'fontFamily': 'Arial, sans-serif'}),
-        dcc.Tab(label="Frota Pesada", value="pesada", style={'backgroundColor': '#333333', 'color': 'white', 'fontFamily': 'Arial, sans-serif'}),
-    ], colors={"border": "#FFD700", "primary": "#FFD700", "background": "#111111"}),
+# Layout do aplicativo
+app.layout = html.Div(style={'backgroundColor': theme['background'], 'color': theme['text'], 'padding': '20px'}, children=[
+    html.H1("Montenegro Business e Participações", style={'textAlign': 'center', 'color': theme['primary']}),
+    html.H3("Dashboard de Gestão de Manutenção", style={'textAlign': 'center', 'color': theme['secondary']}),
     
-    html.Div(id="tab-content", style={'padding': '20px'})
-], style={'backgroundColor': '#111111', 'padding': '30px', 'minHeight': '100vh'})
+    dcc.Tabs(id='tabs', value='visao_geral', children=[
+        dcc.Tab(label='Visão Geral', value='visao_geral', style={'backgroundColor': theme['highlight']}),
+        dcc.Tab(label='Frota Leve', value='frota_leve', style={'backgroundColor': theme['highlight']}),
+        dcc.Tab(label='Frota Pesada', value='frota_pesada', style={'backgroundColor': theme['highlight']})
+    ], style={'fontSize': '18px', 'fontWeight': 'bold', 'color': theme['text']}),
+    
+    html.Div(id='tab-content')
+])
 
-# Callback para atualizar os gráficos conforme a aba selecionada
+# Callback para atualizar o conteúdo com base na aba selecionada
 @app.callback(
-    Output("tab-content", "children"),
-    Input("tabs", "value")
+    Output('tab-content', 'children'),
+    Input('tabs', 'value')
 )
-def atualizar_pagina(aba_selecionada):
-    if aba_selecionada == "geral":
-        return html.Div([
-            dcc.Graph(figure=px.pie(df_manutencao, names='TIPO', values='VALOR PAGO', title="Gastos Totais por Tipo", 
-                                   color='TIPO', color_discrete_sequence=px.colors.sequential.Gold),
-                      style={'backgroundColor': '#222222', 'padding': '20px', 'borderRadius': '10px'}),
-            dcc.Graph(figure=px.line(df_manutencao, x='DATA', y='VALOR PAGO', title="Evolução dos Gastos", 
-                                    line_shape='linear', markers=True, template="plotly_dark", color_discrete_sequence=['#FFD700']),
-                      style={'backgroundColor': '#222222', 'padding': '20px', 'borderRadius': '10px'}),
-        ])
-    elif aba_selecionada == "leve":
-        return html.Div([
-            dcc.Graph(figure=px.bar(df_frota_leve, x='VEÍCULOS', y='VALOR PAGO', title="Frota Leve - Gastos por Veículo", 
-                                   color='VEÍCULOS', color_continuous_scale=px.colors.sequential.Viridis, template="plotly_dark"),
-                      style={'backgroundColor': '#222222', 'padding': '20px', 'borderRadius': '10px'}),
-        ])
-    elif aba_selecionada == "pesada":
-        return html.Div([
-            dcc.Graph(figure=px.bar(df_frota_pesada, x='VEÍCULOS', y='VALOR PAGO', title="Frota Pesada - Gastos por Veículo", 
-                                   color='VEÍCULOS', color_continuous_scale=px.colors.sequential.Viridis, template="plotly_dark"),
-                      style={'backgroundColor': '#222222', 'padding': '20px', 'borderRadius': '10px'}),
-        ])
+def update_tab(tab_name):
+    if tab_name == 'visao_geral':
+        fig = px.bar(df, x='Veículo', y='Custo', color='Categoria', title='Custo de Manutenção por Veículo')
+    elif tab_name == 'frota_leve':
+        df_filtrado = df[df['Categoria'] == 'Leve']
+        fig = px.pie(df_filtrado, names='Veículo', values='Custo', title='Distribuição de Custos - Frota Leve')
+    else:
+        df_filtrado = df[df['Categoria'] == 'Pesada']
+        fig = px.line(df_filtrado, x='Data', y='Custo', color='Veículo', title='Evolução de Custos - Frota Pesada')
+    
+    return dcc.Graph(figure=fig)
 
-# Rodar o servidor Dash
+# Rodar o servidor
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)), debug=False)
+    app.run_server(debug=True)
