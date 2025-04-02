@@ -30,6 +30,15 @@ for coluna in colunas_esperadas:
 for col in ['VALOR PAGO', 'VALOR ECONOMIZADO']:
     df_manutencao[col] = pd.to_numeric(df_manutencao[col], errors='coerce').fillna(0)
 
+# Converter a coluna 'DATA' para datetime
+df_manutencao['DATA'] = pd.to_datetime(df_manutencao['DATA'], errors='coerce')
+
+# Criar uma nova coluna para o ano e mês
+df_manutencao['ANO_MES'] = df_manutencao['DATA'].dt.to_period('M').astype(str)
+
+# Agrupar os dados por 'ANO_MES' e somar os valores pagos
+df_manutencao_mensal = df_manutencao.groupby('ANO_MES').agg({'VALOR PAGO': 'sum'}).reset_index()
+
 # Criar DataFrames separados para frota leve e pesada
 df_frota_leve = df_manutencao[df_manutencao['CATEGORIA'] == 'LEVE']
 df_frota_pesada = df_manutencao[df_manutencao['CATEGORIA'] == 'PESADA']
@@ -66,8 +75,8 @@ def atualizar_pagina(aba_selecionada):
             dcc.Graph(figure=px.pie(df_manutencao, names='TIPO', values='VALOR PAGO', title="Gastos Totais por Tipo", 
                                    color='TIPO', color_discrete_sequence=px.colors.sequential.Blues),
                       style={'backgroundColor': '#222222', 'padding': '20px', 'borderRadius': '10px'}),
-            dcc.Graph(figure=px.line(df_manutencao, x='DATA', y='VALOR PAGO', title="Evolução dos Gastos", 
-                                    line_shape='linear', markers=True, template="plotly_dark", color_discrete_sequence=['#FFFFFF']),
+            dcc.Graph(figure=px.bar(df_manutencao_mensal, x='ANO_MES', y='VALOR PAGO', title="Evolução Mensal dos Gastos", 
+                                    text_auto=True, template="plotly_dark", color_discrete_sequence=['#00CFFF']),
                       style={'backgroundColor': '#222222', 'padding': '20px', 'borderRadius': '10px'}),
         ])
     elif aba_selecionada == "leve":
@@ -86,3 +95,4 @@ def atualizar_pagina(aba_selecionada):
 # Rodar o servidor Dash
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)), debug=False)
+    
