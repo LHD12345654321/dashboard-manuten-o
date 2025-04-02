@@ -64,7 +64,7 @@ def atualizar_pagina(aba_selecionada):
     if aba_selecionada == "geral":
         return html.Div([
             dcc.Graph(figure=px.pie(df_manutencao, names='TIPO', values='VALOR PAGO', title="Gastos Totais por Tipo", 
-                                   color='TIPO', color_discrete_sequence=px.colors.sequential.Greys),
+                                   color='TIPO', color_discrete_sequence=px.colors.sequential.Blues),
                       style={'backgroundColor': '#222222', 'padding': '20px', 'borderRadius': '10px'}),
             dcc.Graph(figure=px.line(df_manutencao, x='DATA', y='VALOR PAGO', title="Evolução dos Gastos", 
                                     line_shape='linear', markers=True, template="plotly_dark", color_discrete_sequence=['#FFFFFF']),
