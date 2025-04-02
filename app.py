@@ -1,50 +1,60 @@
 import dash
-from dash import dcc, html, Input, Output
-import dash_bootstrap_components as dbc
+import dash_core_components as dcc
+import dash_html_components as html
 import pandas as pd
 import plotly.express as px
 
-# Carregar dados
-file_path = "seu_arquivo.xlsx"  # Substitua pelo caminho real
-sheet_name = "MANUTENÇÃO POR VEÍCULO"
-df = pd.read_excel(file_path, sheet_name=sheet_name)
+# Carregar os dados
+file_path = "dados_manutencao.xlsx"
+df = pd.read_excel(file_path, sheet_name='MANUTENÇÃO POR VEÍCULO')
 
-# Inicializar o app
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+# Criar colunas derivadas para melhor análise
+df['Data'] = pd.to_datetime(df['Data'])
+df['Ano'] = df['Data'].dt.year
+df['Mês'] = df['Data'].dt.month_name()
+
+# Inicializar o app Dash
+app = dash.Dash(__name__)
 server = app.server
 
-# Layout
-app.layout = dbc.Container([
-    html.H1("Dashboard de Manutenção de Frota", className="text-center text-light"),
+# Layout do dashboard
+app.layout = html.Div([
+    html.H1("Dashboard de Manutenção de Frota", style={'textAlign': 'center', 'color': 'white'}),
+    html.Div([
+        dcc.Dropdown(
+            id='filtro_ano',
+            options=[{'label': str(ano), 'value': ano} for ano in sorted(df['Ano'].unique())],
+            placeholder="Selecione o Ano",
+            style={'color': 'black'}
+        ),
+        dcc.Dropdown(
+            id='filtro_mes',
+            options=[{'label': mes, 'value': mes} for mes in df['Mês'].unique()],
+            placeholder="Selecione o Mês",
+            style={'color': 'black'}
+        )
+    ], style={'display': 'flex', 'gap': '10px', 'justify-content': 'center'}),
     
-    dbc.Tabs([
-        dbc.Tab(label="Frota Geral", tab_id="geral"),
-        dbc.Tab(label="Frota Leve", tab_id="leve"),
-        dbc.Tab(label="Frota Pesada", tab_id="pesada"),
-    ], id="tabs", active_tab="geral"),
-    
-    html.Div(id="tab-content", className="p-4"),
-])
+    dcc.Graph(id='grafico_manutencao')
+], style={'backgroundColor': '#1e1e1e', 'color': 'white', 'padding': '20px'})
 
-# Callbacks para atualizar o conteúdo das abas
+# Callback para atualizar gráfico
 @app.callback(
-    Output("tab-content", "children"),
-    Input("tabs", "active_tab")
+    dash.dependencies.Output('grafico_manutencao', 'figure'),
+    [dash.dependencies.Input('filtro_ano', 'value'),
+     dash.dependencies.Input('filtro_mes', 'value')]
 )
-def update_tab(active_tab):
-    if active_tab == "geral":
-        fig = px.bar(df, x="Veiculo", y="Custo_Manutencao", title="Custo de Manutenção por Veículo")
-        return dcc.Graph(figure=fig)
-    elif active_tab == "leve":
-        df_leve = df[df["Tipo"] == "Leve"]
-        fig = px.pie(df_leve, names="Veiculo", values="Custo_Manutencao", title="Frota Leve")
-        return dcc.Graph(figure=fig)
-    elif active_tab == "pesada":
-        df_pesada = df[df["Tipo"] == "Pesada"]
-        fig = px.line(df_pesada, x="Data", y="Custo_Manutencao", title="Frota Pesada")
-        return dcc.Graph(figure=fig)
-    return "Selecione uma aba"
+def atualizar_grafico(ano, mes):
+    df_filtrado = df.copy()
+    if ano:
+        df_filtrado = df_filtrado[df_filtrado['Ano'] == ano]
+    if mes:
+        df_filtrado = df_filtrado[df_filtrado['Mês'] == mes]
+    
+    fig = px.bar(df_filtrado, x='Veículo', y='Custo', title='Custo de Manutenção por Veículo', color='Custo')
+    fig.update_layout(template='plotly_dark')
+    return fig
 
-# Executar o app
-if __name__ == "__main__":
+# Rodar o app
+if __name__ == '__main__':
     app.run_server(debug=True)
