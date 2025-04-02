@@ -1,12 +1,14 @@
 import dash
-from dash import dcc, html
+import dash_core_components as dcc
+import dash_html_components as html
 import pandas as pd
 import plotly.express as px
 
 # Carregar os dados
-df = pd.read_excel("dados_manutencao.xlsx", sheet_name='MANUTENÇÃO POR VEÍCULO')
+file_path = r"C:\\Users\\lucas\\Desktop\\Recoil\\dados_manutencao.xlsx"
+df = pd.read_excel(file_path, sheet_name='MANUTENÇÃO POR VEÍCULO')
 
-# Criar colunas derivadas
+# Criar colunas derivadas para melhor análise
 df['Data'] = pd.to_datetime(df['Data'])
 df['Ano'] = df['Data'].dt.year
 df['Mês'] = df['Data'].dt.month_name()
@@ -36,7 +38,7 @@ app.layout = html.Div([
     dcc.Graph(id='grafico_manutencao')
 ], style={'backgroundColor': '#1e1e1e', 'color': 'white', 'padding': '20px'})
 
-# Callback para atualizar o gráfico
+# Callback para atualizar gráfico
 @app.callback(
     dash.dependencies.Output('grafico_manutencao', 'figure'),
     [dash.dependencies.Input('filtro_ano', 'value'),
