@@ -66,11 +66,12 @@ app.layout = html.Div([
 )
 def atualizar_pagina(aba_selecionada):
     if aba_selecionada == "geral":
+        df_agrupado = df_manutencao.groupby('ANO_MES', as_index=False).sum(numeric_only=True)
         return html.Div([
             dcc.Graph(figure=px.pie(df_manutencao, names='TIPO', values='VALOR PAGO', title="Gastos Totais por Tipo", 
                                    color='TIPO', color_discrete_sequence=px.colors.qualitative.Set1),
                       style={'backgroundColor': '#222222', 'padding': '20px', 'borderRadius': '10px'}),
-            dcc.Graph(figure=px.bar(df_manutencao.groupby('ANO_MES', as_index=False).sum(), x='ANO_MES', y='VALOR PAGO', 
+            dcc.Graph(figure=px.bar(df_agrupado, x='ANO_MES', y='VALOR PAGO', 
                                     title="Evolução Mensal dos Gastos", template="plotly_dark", color_discrete_sequence=['#00CFFF']),
                       style={'backgroundColor': '#222222', 'padding': '20px', 'borderRadius': '10px'})
         ])
