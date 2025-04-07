@@ -1,132 +1,101 @@
-/* ---------------------- BASE ---------------------- */
+/* Fundo geral escuro com degradê sutil */
 body {
-  background-color: #0d0d0d;
+  background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
+  color: #f0f0f0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: white;
   margin: 0;
-  padding: 0;
 }
 
-h1, h2, h3 {
+/* Títulos principais com dourado */
+h1 {
   text-align: center;
-  color: white;
+  color: #FFD700;
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+h2 {
+  text-align: center;
+  color: #AAAAAA;
+  font-size: 24px;
+  margin-bottom: 30px;
+}
+
+h3 {
+  color: #FFD700;
+  margin-bottom: 10px;
 }
 
 /* Indicadores */
 #indicadores-leve p,
 #indicadores-pesada p {
-  margin: 0.3rem 0;
-  font-size: 1rem;
+  font-size: 18px;
+  color: #DDDDDD;
+  margin: 5px 0;
 }
 
-/* ---------------------- TABS ---------------------- */
-.custom-tabs-container {
-  display: flex;
-  justify-content: center;
-  margin: 1rem 0;
-}
-
-.tab-button {
-  background-color: #1a1a1a;
-  color: white;
-  border: none;
-  padding: 0.8rem 2rem;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
-  margin: 0 5px;
-}
-
-.tab-button:hover {
-  background-color: #333;
-}
-
-.tab-button.active {
-  background-color: #0d0d0d;
-  border-bottom: 2px solid gold;
-  color: gold;
-}
-
-/* ---------------------- CONTAINERS ---------------------- */
-.content-container {
-  padding: 1.5rem;
-  background-color: #0d0d0d;
-  border-radius: 12px;
-  margin: 1rem auto;
-  width: 95%;
-  max-width: 1500px;
-}
-
-/* ---------------------- GRÁFICOS ---------------------- */
-.graph-container {
-  background-color: #1a1a1a;
-  padding: 1rem;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
-  margin-bottom: 2rem;
-}
-
-.recharts-cartesian-axis-tick-value {
-  fill: white;
-  font-size: 12px;
-}
-
-.recharts-tooltip-label {
-  color: black;
-  font-weight: bold;
-}
-
-.recharts-tooltip-item {
-  color: black;
-}
-
-.recharts-legend-item-text {
-  fill: white;
-}
-
-.recharts-label-list text {
-  fill: white;
-  font-weight: bold;
-}
-
-/* ---------------------- FILTROS ---------------------- */
-.filters-container {
-  display: flex;
-  justify-content: start;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin: 1rem 0;
-}
-
-.Select-control {
-  background-color: #1a1a1a;
-  color: white;
+/* Dropdowns e DatePicker */
+.Select-control,
+.dash-dropdown,
+.DateRangePicker,
+input[type="text"] {
+  background-color: #1f1f1f !important;
+  color: #fff !important;
+  border: 1px solid #333 !important;
+  border-radius: 8px;
 }
 
 .Select-menu-outer {
-  background-color: #1a1a1a;
-  color: white;
+  background-color: #1f1f1f !important;
+  color: white !important;
 }
 
-.DateRangePicker {
-  background-color: #1a1a1a;
-  color: white;
-  padding: 0.5rem;
-  border-radius: 5px;
+/* Gráficos */
+.js-plotly-plot .plotly {
+  background-color: transparent !important;
 }
 
-/* ---------------------- LOGO ---------------------- */
+/* Abas */
+.tab {
+  background-color: #1a1a1a !important;
+  border: none !important;
+  padding: 10px 20px;
+  font-weight: bold;
+  color: #CCCCCC;
+}
+
+.tab--selected {
+  background-color: #333333 !important;
+  color: #FFD700 !important;
+  border-bottom: 3px solid #FFD700 !important;
+}
+
+/* Botões (caso adicione futuramente) */
+button {
+  background-color: #FFD700;
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+button:hover {
+  background-color: #e6c200;
+}
+
+/* Logo */
 img.logo {
+  max-width: 300px;
+  height: auto;
   display: block;
-  margin: auto;
-  max-height: 80px;
-  margin-bottom: 30px;
+  margin: 0 auto 30px auto;
 }
 
-/* ---------------------- RESPONSIVIDADE ---------------------- */
+/* Gráficos responsivos */
 @media screen and (max-width: 768px) {
   .Select-control,
   .dash-dropdown,
