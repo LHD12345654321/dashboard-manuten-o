@@ -19,7 +19,7 @@ except Exception as e:
     exit()
 
 # Verificar se todas as colunas necessárias estão presentes
-colunas_esperadas = ['VEÍCULOS', 'VALOR PAGO', 'VALOR ECONOMIZADO', 'TIPO', 'CATEGORIA', 'DATA']
+colunas_esperadas = ['VEÍCULOS', 'VALOR PAGO', 'VALOR ECONOMIZADO', 'TIPO', 'CATEGORIA', 'DATA', 'PLACA']
 for coluna in colunas_esperadas:
     if coluna not in df_manutencao.columns:
         print(f"ERRO: A coluna '{coluna}' não foi encontrada na planilha! Verifique o nome exato.")
@@ -33,6 +33,9 @@ for col in ['VALOR PAGO', 'VALOR ECONOMIZADO']:
 # Converter coluna de data e criar nova coluna formatada para agrupamento por mês/ano
 df_manutencao['DATA'] = pd.to_datetime(df_manutencao['DATA'], errors='coerce')
 df_manutencao['ANO_MES'] = df_manutencao['DATA'].dt.strftime('%b/%y').str.upper()
+
+# Criar coluna combinando modelo e placa para diferenciar veículos iguais
+df_manutencao['MODELO/PLACA'] = df_manutencao['VEÍCULOS'] + ' / ' + df_manutencao['PLACA'].astype(str)
 
 # Criar DataFrames separados para frota leve e pesada
 df_frota_leve = df_manutencao[df_manutencao['CATEGORIA'] == 'LEVE']
@@ -55,7 +58,7 @@ app.layout = html.Div([
         dcc.Tab(label="Frota Leve", value="leve", style={'backgroundColor': '#222222', 'color': 'white', 'fontFamily': 'Arial, sans-serif'}),
         dcc.Tab(label="Frota Pesada", value="pesada", style={'backgroundColor': '#222222', 'color': 'white', 'fontFamily': 'Arial, sans-serif'}),
     ], colors={"border": "#FFFFFF", "primary": "#FFFFFF", "background": "#111111"}),
-    
+
     html.Div(id="tab-content", style={'padding': '20px'})
 ], style={'backgroundColor': '#111111', 'padding': '30px', 'minHeight': '100vh'})
 
@@ -76,16 +79,38 @@ def atualizar_pagina(aba_selecionada):
                       style={'backgroundColor': '#222222', 'padding': '20px', 'borderRadius': '10px'})
         ])
     elif aba_selecionada == "leve":
+        df_agrupado_leve = df_frota_leve.groupby('MODELO/PLACA', as_index=False)['VALOR PAGO'].sum()
+        fig_leve = px.bar(df_agrupado_leve, x='MODELO/PLACA', y='VALOR PAGO', text='VALOR PAGO', 
+                          title="Frota Leve - Gastos por Veículo", color='MODELO/PLACA', template="plotly_dark")
+        fig_leve.update_traces(textposition='outside')
+        fig_leve.update_layout(
+            xaxis_title=None,
+            yaxis_title='VALOR PAGO',
+            legend_title=None,
+            margin=dict(t=50, b=50),
+            xaxis=dict(title=dict(text='MODELO/PLACA', font=dict(size=14)), tickangle=0),
+            title_x=0.5
+        )
         return html.Div([
-            dcc.Graph(figure=px.bar(df_frota_leve, x='VEÍCULOS', y='VALOR PAGO', title="Frota Leve - Gastos por Veículo", 
-                                   color='VEÍCULOS', color_continuous_scale=px.colors.sequential.Greys, template="plotly_dark"),
-                      style={'backgroundColor': '#222222', 'padding': '20px', 'borderRadius': '10px'}),
+            dcc.Graph(figure=fig_leve,
+                      style={'backgroundColor': '#222222', 'padding': '20px', 'borderRadius': '10px'})
         ])
     elif aba_selecionada == "pesada":
+        df_agrupado_pesada = df_frota_pesada.groupby('MODELO/PLACA', as_index=False)['VALOR PAGO'].sum()
+        fig_pesada = px.bar(df_agrupado_pesada, x='MODELO/PLACA', y='VALOR PAGO', text='VALOR PAGO', 
+                            title="Frota Pesada - Gastos por Veículo", color='MODELO/PLACA', template="plotly_dark")
+        fig_pesada.update_traces(textposition='outside')
+        fig_pesada.update_layout(
+            xaxis_title=None,
+            yaxis_title='VALOR PAGO',
+            legend_title=None,
+            margin=dict(t=50, b=50),
+            xaxis=dict(title=dict(text='MODELO/PLACA', font=dict(size=14)), tickangle=0),
+            title_x=0.5
+        )
         return html.Div([
-            dcc.Graph(figure=px.bar(df_frota_pesada, x='VEÍCULOS', y='VALOR PAGO', title="Frota Pesada - Gastos por Veículo", 
-                                   color='VEÍCULOS', color_continuous_scale=px.colors.sequential.Greys, template="plotly_dark"),
-                      style={'backgroundColor': '#222222', 'padding': '20px', 'borderRadius': '10px'}),
+            dcc.Graph(figure=fig_pesada,
+                      style={'backgroundColor': '#222222', 'padding': '20px', 'borderRadius': '10px'})
         ])
 
 # Rodar o servidor Dash
