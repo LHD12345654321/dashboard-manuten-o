@@ -1,0 +1,99 @@
+
+/* Reset básico */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(to bottom, #1a1a1a, #000000);
+  color: #ffffff;
+}
+
+/* Títulos */
+h1, h2, h3 {
+  text-align: center;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #d4af37; /* Dourado */
+  text-shadow: 0 0 6px rgba(212, 175, 55, 0.6);
+}
+
+/* Indicadores */
+#indicadores-leve, #indicadores-pesada {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px 20px;
+  border-radius: 15px;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+}
+
+/* Tabs */
+.tab--selected {
+  background-color: #222 !important;
+  border-top: 4px solid #d4af37 !important;
+  font-weight: bold;
+  color: #fff !important;
+}
+.tab {
+  background-color: #111;
+  border: none;
+  color: #aaa;
+}
+
+/* Dropdowns e DatePickers */
+.Select-control, .DateRangePicker, input {
+  background-color: #222 !important;
+  color: #fff !important;
+  border: 1px solid #d4af37 !important;
+  border-radius: 8px;
+}
+
+.Select-menu-outer {
+  background-color: #333 !important;
+  color: #fff !important;
+}
+
+/* Gráficos */
+.js-plotly-plot .plotly {
+  background-color: #1a1a1a !important;
+}
+
+/* Botões customizados futuramente */
+button {
+  background-color: #d4af37;
+  color: #000;
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: none;
+  font-weight: bold;
+  transition: all 0.3s ease-in-out;
+}
+
+button:hover {
+  background-color: #ffd700;
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.7);
+}
+
+/* Ajuste de padding nos filtros */
+.dash-dropdown, .DateRangePicker {
+  margin-bottom: 10px;
+}
+
+/* Responsivo */
+@media screen and (max-width: 768px) {
+  #indicadores-leve, #indicadores-pesada {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .dash-dropdown, .DateRangePicker {
+    width: 100% !important;
+    margin-bottom: 15px;
+  }
+}
