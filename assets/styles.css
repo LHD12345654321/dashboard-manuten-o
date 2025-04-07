@@ -1,99 +1,111 @@
-
-/* Reset básico */
+/* Fundo geral escuro com degradê sutil */
 body {
+  background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
+  color: #f0f0f0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', Roboto, sans-serif;
-  background: linear-gradient(to bottom, #1a1a1a, #000000);
-  color: #ffffff;
 }
 
-/* Títulos */
-h1, h2, h3 {
+/* Títulos principais com dourado */
+h1 {
   text-align: center;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #d4af37; /* Dourado */
-  text-shadow: 0 0 6px rgba(212, 175, 55, 0.6);
+  color: #FFD700;
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+h2 {
+  text-align: center;
+  color: #AAAAAA;
+  font-size: 24px;
+  margin-bottom: 30px;
+}
+
+h3 {
+  color: #FFD700;
+  margin-bottom: 10px;
 }
 
 /* Indicadores */
-#indicadores-leve, #indicadores-pesada {
-  display: flex;
-  gap: 40px;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 15px 20px;
-  border-radius: 15px;
-  box-shadow: 0 0 15px rgba(212, 175, 55, 0.25);
-  margin-top: 10px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #fff;
+#indicadores-leve p,
+#indicadores-pesada p {
+  font-size: 18px;
+  color: #DDDDDD;
+  margin: 5px 0;
 }
 
-/* Tabs */
-.tab--selected {
-  background-color: #222 !important;
-  border-top: 4px solid #d4af37 !important;
-  font-weight: bold;
+/* Dropdowns e DatePicker */
+.Select-control,
+.dash-dropdown,
+.DateRangePicker,
+input[type="text"] {
+  background-color: #1f1f1f !important;
   color: #fff !important;
-}
-.tab {
-  background-color: #111;
-  border: none;
-  color: #aaa;
-}
-
-/* Dropdowns e DatePickers */
-.Select-control, .DateRangePicker, input {
-  background-color: #222 !important;
-  color: #fff !important;
-  border: 1px solid #d4af37 !important;
+  border: 1px solid #333 !important;
   border-radius: 8px;
 }
 
 .Select-menu-outer {
-  background-color: #333 !important;
-  color: #fff !important;
+  background-color: #1f1f1f !important;
+  color: white !important;
 }
 
 /* Gráficos */
 .js-plotly-plot .plotly {
-  background-color: #1a1a1a !important;
+  background-color: transparent !important;
 }
 
-/* Botões customizados futuramente */
-button {
-  background-color: #d4af37;
-  color: #000;
-  padding: 8px 18px;
-  border-radius: 10px;
-  border: none;
+/* Abas */
+.tab {
+  background-color: #1a1a1a !important;
+  border: none !important;
+  padding: 10px 20px;
   font-weight: bold;
-  transition: all 0.3s ease-in-out;
+  color: #CCCCCC;
+}
+
+.tab--selected {
+  background-color: #333333 !important;
+  color: #FFD700 !important;
+  border-bottom: 3px solid #FFD700 !important;
+}
+
+/* Botões (caso adicione futuramente) */
+button {
+  background-color: #FFD700;
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
 }
 
 button:hover {
-  background-color: #ffd700;
-  transform: scale(1.05);
-  box-shadow: 0 0 10px rgba(212, 175, 55, 0.7);
+  background-color: #e6c200;
 }
 
-/* Ajuste de padding nos filtros */
-.dash-dropdown, .DateRangePicker {
-  margin-bottom: 10px;
+/* Logo */
+img.logo {
+  max-width: 300px;
+  height: auto;
+  display: block;
+  margin: 0 auto 30px auto;
 }
 
-/* Responsivo */
+/* Gráficos responsivos */
 @media screen and (max-width: 768px) {
-  #indicadores-leve, #indicadores-pesada {
-    flex-direction: column;
-    align-items: center;
+  .Select-control,
+  .dash-dropdown,
+  .DateRangePicker {
+      width: 100% !important;
+      margin-bottom: 10px;
   }
 
-  .dash-dropdown, .DateRangePicker {
-    width: 100% !important;
-    margin-bottom: 15px;
+  .dash-dropdown-container,
+  .filters-container {
+      flex-direction: column;
   }
 }
