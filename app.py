@@ -2,6 +2,7 @@ import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
 import plotly.express as px
+import plotly.graph_objects as go
 import pandas as pd
 import os
 from dash.exceptions import PreventUpdate
@@ -40,10 +41,12 @@ app.title = "Dashboard - Montenegro Business e Participações"
 
 # Layout
 app.layout = html.Div([
+    dcc.Store(id="aba-salva", storage_type="local"),  # 🆕 Armazenamento local da aba preferida
+
     html.H1("Montenegro Business e Participações", style={'textAlign': 'center', 'color': '#FFF'}),
     html.H2("Dashboard de Gestão de Manutenção", style={'textAlign': 'center', 'color': '#CCC'}),
 
-    dcc.Tabs(id="tabs", value="geral", children=[
+    dcc.Tabs(id="tabs", value=None, children=[  # 🆕 value=None para ser definido dinamicamente
         dcc.Tab(label="Visão Geral", value="geral"),
         dcc.Tab(label="Frota Leve", value="leve"),
         dcc.Tab(label="Frota Pesada", value="pesada"),
@@ -51,6 +54,23 @@ app.layout = html.Div([
 
     html.Div(id="tab-content", style={'padding': '20px'})
 ], style={'backgroundColor': '#111', 'padding': '30px'})
+
+# 🆕 Callback para definir a aba inicial com base no armazenamento local
+@app.callback(
+    Output("tabs", "value"),
+    Input("aba-salva", "data")
+)
+def definir_aba_inicial(aba_salva):
+    return aba_salva if aba_salva else "geral"
+
+# 🆕 Callback para salvar a aba preferida quando ela for trocada
+@app.callback(
+    Output("aba-salva", "data"),
+    Input("tabs", "value"),
+    prevent_initial_call=True
+)
+def salvar_aba_preferida(aba_atual):
+    return aba_atual
 
 # Callback principal
 @app.callback(
@@ -73,11 +93,7 @@ def atualizar_pagina(aba):
             html.Div([
                 html.Div([
                     html.H3("Indicadores", style={"color": "white"}),
-                    html.Div([
-                        html.P(f"Valor Pago: R$ {df_filtro['VALOR PAGO'].sum():,.2f}"),
-                        html.P(f"Valor Economizado: R$ {df_filtro['VALOR ECONOMIZADO'].sum():,.2f}"),
-                        html.P(f"Qtd. Manutenções: {df_filtro.shape[0]}")
-                    ], style={'color': 'white'})
+                    html.Div(id=f"indicadores-{aba}", style={'color': 'white'})
                 ], style={'marginBottom': '30px'})
             ]),
 
@@ -102,39 +118,61 @@ def atualizar_pagina(aba):
             dcc.Graph(id=f"grafico-{aba}")
         ])
 
-# Callback de gráfico com filtros
+# Callback com gráfico e indicadores juntos para frota leve
 @app.callback(
-    Output("grafico-leve", "figure"),
-    Input("data-range-leve", "start_date"),
-    Input("data-range-leve", "end_date"),
-    Input("tipo-dropdown-leve", "value")
+    [
+        Output("grafico-leve", "figure"),
+        Output("indicadores-leve", "children")
+    ],
+    [
+        Input("data-range-leve", "start_date"),
+        Input("data-range-leve", "end_date"),
+        Input("tipo-dropdown-leve", "value")
+    ]
 )
-def atualizar_grafico_leve(start_date, end_date, tipos):
-    return gerar_grafico_frota('LEVE', start_date, end_date, tipos)
+def atualizar_leve(start_date, end_date, tipos):
+    return gerar_grafico_e_indicadores('LEVE', start_date, end_date, tipos)
 
+# Callback com gráfico e indicadores juntos para frota pesada
 @app.callback(
-    Output("grafico-pesada", "figure"),
-    Input("data-range-pesada", "start_date"),
-    Input("data-range-pesada", "end_date"),
-    Input("tipo-dropdown-pesada", "value")
+    [
+        Output("grafico-pesada", "figure"),
+        Output("indicadores-pesada", "children")
+    ],
+    [
+        Input("data-range-pesada", "start_date"),
+        Input("data-range-pesada", "end_date"),
+        Input("tipo-dropdown-pesada", "value")
+    ]
 )
-def atualizar_grafico_pesada(start_date, end_date, tipos):
-    return gerar_grafico_frota('PESADA', start_date, end_date, tipos)
+def atualizar_pesada(start_date, end_date, tipos):
+    return gerar_grafico_e_indicadores('PESADA', start_date, end_date, tipos)
 
-# Função de geração de gráfico
-
-def gerar_grafico_frota(categoria, start_date, end_date, tipos):
+# Função de geração de gráfico + indicadores
+def gerar_grafico_e_indicadores(categoria, start_date, end_date, tipos):
     df = df_manutencao[df_manutencao['CATEGORIA'] == categoria]
     if start_date and end_date:
         df = df[(df['DATA'] >= start_date) & (df['DATA'] <= end_date)]
     if tipos:
         df = df[df['TIPO'].isin(tipos)]
+
     df_agrupado = df.groupby('MODELO/PLACA', as_index=False)['VALOR PAGO'].sum()
     fig = px.bar(df_agrupado, x='MODELO/PLACA', y='VALOR PAGO', text='VALOR PAGO',
                  title=f"Frota {categoria.title()} - Gastos por Veículo", template="plotly_dark")
     fig.update_traces(textposition='outside')
-    fig.update_layout(title_x=0.5, xaxis_tickangle=0)
-    return fig
+    fig.update_layout(title_x=0.5, xaxis_tickangle=-45 if categoria == 'PESADA' else 0, margin=dict(b=150))
+
+    valor_pago = df['VALOR PAGO'].sum()
+    valor_eco = df['VALOR ECONOMIZADO'].sum()
+    qtd = df.shape[0]
+
+    indicadores = [
+        html.P(f"Valor Pago: R$ {valor_pago:,.2f}"),
+        html.P(f"Valor Economizado: R$ {valor_eco:,.2f}"),
+        html.P(f"Qtd. Manutenções: {qtd}")
+    ]
+
+    return fig, indicadores
 
 # Run
 if __name__ == '__main__':
