@@ -1,41 +1,48 @@
 /* Fundo geral escuro com degradê sutil */
 body {
-  background: linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 100%);
+  background: linear-gradient(180deg, #0f0f0f 0%, #181818 100%);
   color: #f0f0f0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
-/* Títulos principais com dourado */
+/* Títulos principais com dourado refinado */
 h1 {
   text-align: center;
   color: #FFD700;
-  font-size: 36px;
+  font-size: 40px;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
 h2 {
   text-align: center;
   color: #AAAAAA;
-  font-size: 24px;
-  margin-bottom: 30px;
+  font-size: 28px;
+  margin-bottom: 40px;
+  letter-spacing: 1px;
 }
 
 h3 {
   color: #FFD700;
-  margin-bottom: 10px;
-  font-size: 20px;
+  margin-bottom: 15px;
+  font-size: 22px;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
 /* Indicadores */
 #indicadores-leve p,
 #indicadores-pesada p,
 #indicadores-geral p {
-  font-size: 18px;
+  font-size: 20px;
   color: #DDDDDD;
-  margin: 5px 0;
+  margin: 10px 0;
+  font-weight: 500;
 }
 
 /* Dropdowns e DatePicker */
@@ -46,7 +53,10 @@ input[type="text"] {
   background-color: #1f1f1f !important;
   color: #fff !important;
   border: 1px solid #333 !important;
-  border-radius: 8px;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 16px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
 }
 
 .Select-menu-outer {
@@ -63,15 +73,17 @@ input[type="text"] {
 .tab {
   background-color: #1a1a1a !important;
   border: none !important;
-  padding: 10px 20px;
+  padding: 12px 25px;
   font-weight: bold;
   color: #CCCCCC;
+  border-radius: 5px;
 }
 
 .tab--selected {
   background-color: #333333 !important;
   color: #FFD700 !important;
   border-bottom: 3px solid #FFD700 !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 /* Botões */
@@ -79,37 +91,42 @@ button {
   background-color: #FFD700;
   color: #000;
   border: none;
-  border-radius: 10px;
-  padding: 10px 15px;
+  border-radius: 12px;
+  padding: 12px 20px;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.3s;
-  margin: 5px;
+  transition: background 0.3s, transform 0.2s ease-in-out;
+  margin: 10px;
+  font-size: 16px;
 }
 
 button:hover {
   background-color: #e6c200;
+  transform: scale(1.05);
 }
 
 /* Botões de exportação */
 .export-button {
-  margin-top: 10px;
+  margin-top: 15px;
   text-align: right;
 }
 
 /* Logo */
 img.logo {
-  max-width: 300px;
+  max-width: 250px;
   height: auto;
   display: block;
-  margin: 0 auto 30px auto;
+  margin: 0 auto 40px auto;
 }
 
 /* Tooltips personalizados */
 div[data-testid="tooltip"] {
   background-color: #333 !important;
   color: #FFD700 !important;
-  border: 1px solid #FFD700;
+  border: 2px solid #FFD700;
+  border-radius: 5px;
+  font-size: 14px;
+  padding: 8px;
 }
 
 /* Container dos filtros responsivo */
@@ -117,8 +134,8 @@ div[data-testid="tooltip"] {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 15px;
+  margin-bottom: 25px;
 }
 
 /* Gráficos responsivos */
@@ -127,7 +144,8 @@ div[data-testid="tooltip"] {
   .dash-dropdown,
   .DateRangePicker {
     width: 100% !important;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    padding: 12px;
   }
 
   .filters-container {
@@ -137,5 +155,18 @@ div[data-testid="tooltip"] {
 
   button {
     width: 100%;
+    padding: 12px;
+  }
+
+  h1 {
+    font-size: 30px;
+  }
+
+  h2 {
+    font-size: 22px;
+  }
+
+  h3 {
+    font-size: 18px;
   }
 }

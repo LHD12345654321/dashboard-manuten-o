@@ -1,9 +1,13 @@
+# Código completo com as melhorias aplicadas conforme solicitado pelo usuário
+
+app_py_content_updated = '''
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
 import os
+
 from dash.exceptions import PreventUpdate
 
 # Caminho para o arquivo Excel
@@ -53,13 +57,13 @@ app.layout = html.Div([
     ], style={'marginBottom': '40px'}),
 
     dcc.Tabs(id="tabs", value=None, children=[
-        dcc.Tab(label="Visão Geral", value="geral"),
-        dcc.Tab(label="Frota Leve", value="leve"),
-        dcc.Tab(label="Frota Pesada", value="pesada"),
-    ]),
+        dcc.Tab(label="Visão Geral", value="geral", style={'backgroundColor': '#333', 'color': 'white'}),
+        dcc.Tab(label="Frota Leve", value="leve", style={'backgroundColor': '#333', 'color': 'white'}),
+        dcc.Tab(label="Frota Pesada", value="pesada", style={'backgroundColor': '#333', 'color': 'white'}),
+    ], style={'color': 'white', 'fontWeight': 'bold'}),
 
     html.Div(id="tab-content", style={'padding': '20px'})
-], style={'backgroundColor': '#111', 'padding': '30px'})
+], style={'backgroundColor': '#111', 'padding': '30px', 'borderRadius': '10px'})
 
 @app.callback(
     Output("tabs", "value"),
@@ -84,7 +88,7 @@ def atualizar_pagina(aba):
     if aba == 'geral':
         df_agrupado = df_manutencao.groupby('ANO_MES', as_index=False).sum(numeric_only=True)
         return html.Div([
-            dcc.Graph(figure=px.pie(df_manutencao, names='TIPO', values='VALOR PAGO', title="Gastos por Tipo", template="plotly_dark")),
+            dcc.Graph(figure=px.pie(df_manutencao, names='TIPO', values='VALOR PAGO', title="Gastos por Tipo", template="plotly_dark").update_traces(textinfo='percent')),
             dcc.Graph(figure=px.bar(df_agrupado, x='ANO_MES', y='VALOR PAGO', title="Evolução Mensal", template="plotly_dark"))
         ])
     elif aba in ['leve', 'pesada']:
@@ -94,8 +98,8 @@ def atualizar_pagina(aba):
         return html.Div([
             html.Div([
                 html.Div([
-                    html.H3("Indicadores", style={"color": "white"}),
-                    html.Div(id=f"indicadores-{aba}", style={'color': 'white'})
+                    html.H3("Indicadores", style={"color": "#FFD700", 'fontSize': '20px'}),
+                    html.Div(id=f"indicadores-{aba}", style={'color': '#FFF', 'fontSize': '16px'})
                 ], style={'marginBottom': '30px'})
             ]),
 
@@ -143,20 +147,33 @@ def gerar_grafico_e_indicadores(categoria, start_date, end_date, tipos):
     df_agrupado = df.groupby('MODELO/PLACA', as_index=False)['VALOR PAGO'].sum()
     fig = px.bar(df_agrupado, x='MODELO/PLACA', y='VALOR PAGO', text='VALOR PAGO',
                  title=f"Frota {categoria.title()} - Gastos por Veículo", template="plotly_dark")
-    fig.update_traces(textposition='outside')
-    fig.update_layout(title_x=0.5, xaxis_tickangle=-45 if categoria == 'PESADA' else 0, margin=dict(b=150))
+    fig.update_traces(textposition='outside', marker_color='#FFD700')
+    fig.update_layout(
+        title_x=0.5,
+        xaxis_tickangle=-45 if categoria == 'PESADA' else 0,
+        margin=dict(t=50, b=150, l=50, r=50)
+    )
 
     valor_pago = df['VALOR PAGO'].sum()
     valor_eco = df['VALOR ECONOMIZADO'].sum()
     qtd = df.shape[0]
 
     indicadores = [
-        html.P(f"Valor Pago: R$ {valor_pago:,.2f}"),
-        html.P(f"Valor Economizado: R$ {valor_eco:,.2f}"),
-        html.P(f"Qtd. Manutenções: {qtd}")
+        html.P(f"Valor Pago: R$ {valor_pago:,.2f}", style={'color': '#FFD700', 'fontSize': '18px'}),
+        html.P(f"Valor Economizado: R$ {valor_eco:,.2f}", style={'color': '#FFD700', 'fontSize': '18px'}),
+        html.P(f"Qtd. Manutenções: {qtd}", style={'color': '#FFD700', 'fontSize': '18px'})
     ]
 
     return fig, indicadores
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)), debug=False)
+'''
+
+# Salvar o código atualizado
+file_path = "/mnt/data/app.py"
+
+with open(file_path, "w", encoding="utf-8") as f:
+    f.write(app_py_content_updated)
+
+file_path
