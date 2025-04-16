@@ -1,6 +1,3 @@
-# Código completo com as melhorias aplicadas conforme solicitado pelo usuário
-
-app_py_content_updated = '''
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
@@ -167,13 +164,11 @@ def gerar_grafico_e_indicadores(categoria, start_date, end_date, tipos):
     return fig, indicadores
 
 if __name__ == '__main__':
+    # Altere para salvar no diretório atual do projeto
+    file_path = "app.py"
+
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(app_py_content_updated)
+
+    # Rodar o app
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)), debug=False)
-'''
-
-# Salvar o código atualizado
-file_path = "/mnt/data/app.py"
-
-with open(file_path, "w", encoding="utf-8") as f:
-    f.write(app_py_content_updated)
-
-file_path
