@@ -2,7 +2,6 @@ import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output
 import plotly.express as px
-import plotly.graph_objects as go
 import pandas as pd
 import os
 from dash.exceptions import PreventUpdate
@@ -20,33 +19,40 @@ except Exception as e:
     print(f"Erro ao carregar a planilha: {e}")
     exit()
 
-# Verificar colunas
 colunas_esperadas = ['VEÍCULOS', 'VALOR PAGO', 'VALOR ECONOMIZADO', 'TIPO', 'CATEGORIA', 'DATA', 'PLACA']
 for coluna in colunas_esperadas:
     if coluna not in df_manutencao.columns:
         print(f"ERRO: A coluna '{coluna}' não foi encontrada na planilha!")
         exit()
 
-# Converter tipos e criar colunas auxiliares
 df_manutencao['VALOR PAGO'] = pd.to_numeric(df_manutencao['VALOR PAGO'], errors='coerce').fillna(0)
 df_manutencao['VALOR ECONOMIZADO'] = pd.to_numeric(df_manutencao['VALOR ECONOMIZADO'], errors='coerce').fillna(0)
 df_manutencao['DATA'] = pd.to_datetime(df_manutencao['DATA'], errors='coerce')
 df_manutencao['ANO_MES'] = df_manutencao['DATA'].dt.strftime('%b/%y').str.upper()
 df_manutencao['MODELO/PLACA'] = df_manutencao['VEÍCULOS'] + ' / ' + df_manutencao['PLACA'].astype(str)
 
-# Inicializar app
 app = dash.Dash(__name__)
 server = app.server
 app.title = "Dashboard - Montenegro Business e Participações"
 
-# Layout
 app.layout = html.Div([
-    dcc.Store(id="aba-salva", storage_type="local"),  # 🆕 Armazenamento local da aba preferida
+    dcc.Store(id="aba-salva", storage_type="local"),
 
-    html.H1("Montenegro Business e Participações", style={'textAlign': 'center', 'color': '#FFF'}),
-    html.H2("Dashboard de Gestão de Manutenção", style={'textAlign': 'center', 'color': '#CCC'}),
+    html.Div([
+        html.Img(
+            src="/assets/logo_montenegro.png",
+            style={
+                "height": "80px",
+                "margin": "0 auto",
+                "display": "block",
+                "marginBottom": "20px"
+            }
+        ),
+        html.H1("Montenegro Business e Participações", style={'textAlign': 'center', 'color': '#FFD700'}),
+        html.H2("Dashboard de Gestão de Manutenção", style={'textAlign': 'center', 'color': '#AAA'})
+    ], style={'marginBottom': '40px'}),
 
-    dcc.Tabs(id="tabs", value=None, children=[  # 🆕 value=None para ser definido dinamicamente
+    dcc.Tabs(id="tabs", value=None, children=[
         dcc.Tab(label="Visão Geral", value="geral"),
         dcc.Tab(label="Frota Leve", value="leve"),
         dcc.Tab(label="Frota Pesada", value="pesada"),
@@ -55,7 +61,6 @@ app.layout = html.Div([
     html.Div(id="tab-content", style={'padding': '20px'})
 ], style={'backgroundColor': '#111', 'padding': '30px'})
 
-# 🆕 Callback para definir a aba inicial com base no armazenamento local
 @app.callback(
     Output("tabs", "value"),
     Input("aba-salva", "data")
@@ -63,7 +68,6 @@ app.layout = html.Div([
 def definir_aba_inicial(aba_salva):
     return aba_salva if aba_salva else "geral"
 
-# 🆕 Callback para salvar a aba preferida quando ela for trocada
 @app.callback(
     Output("aba-salva", "data"),
     Input("tabs", "value"),
@@ -72,7 +76,6 @@ def definir_aba_inicial(aba_salva):
 def salvar_aba_preferida(aba_atual):
     return aba_atual
 
-# Callback principal
 @app.callback(
     Output("tab-content", "children"),
     Input("tabs", "value")
@@ -81,10 +84,9 @@ def atualizar_pagina(aba):
     if aba == 'geral':
         df_agrupado = df_manutencao.groupby('ANO_MES', as_index=False).sum(numeric_only=True)
         return html.Div([
-            dcc.Graph(figure=px.pie(df_manutencao, names='TIPO', values='VALOR PAGO', title="Gastos por Tipo")),
-            dcc.Graph(figure=px.bar(df_agrupado, x='ANO_MES', y='VALOR PAGO', title="Evolução Mensal"))
+            dcc.Graph(figure=px.pie(df_manutencao, names='TIPO', values='VALOR PAGO', title="Gastos por Tipo", template="plotly_dark")),
+            dcc.Graph(figure=px.bar(df_agrupado, x='ANO_MES', y='VALOR PAGO', title="Evolução Mensal", template="plotly_dark"))
         ])
-
     elif aba in ['leve', 'pesada']:
         df_filtro = df_manutencao[df_manutencao['CATEGORIA'] == ('LEVE' if aba == 'leve' else 'PESADA')]
         tipos_disponiveis = df_filtro['TIPO'].dropna().unique()
@@ -105,7 +107,6 @@ def atualizar_pagina(aba):
                     display_format='DD/MM/YYYY',
                     style={'marginRight': '20px'}
                 ),
-
                 dcc.Dropdown(
                     id=f"tipo-dropdown-{aba}",
                     options=[{'label': tipo, 'value': tipo} for tipo in tipos_disponiveis],
@@ -118,37 +119,20 @@ def atualizar_pagina(aba):
             dcc.Graph(id=f"grafico-{aba}")
         ])
 
-# Callback com gráfico e indicadores juntos para frota leve
 @app.callback(
-    [
-        Output("grafico-leve", "figure"),
-        Output("indicadores-leve", "children")
-    ],
-    [
-        Input("data-range-leve", "start_date"),
-        Input("data-range-leve", "end_date"),
-        Input("tipo-dropdown-leve", "value")
-    ]
+    [Output("grafico-leve", "figure"), Output("indicadores-leve", "children")],
+    [Input("data-range-leve", "start_date"), Input("data-range-leve", "end_date"), Input("tipo-dropdown-leve", "value")]
 )
 def atualizar_leve(start_date, end_date, tipos):
     return gerar_grafico_e_indicadores('LEVE', start_date, end_date, tipos)
 
-# Callback com gráfico e indicadores juntos para frota pesada
 @app.callback(
-    [
-        Output("grafico-pesada", "figure"),
-        Output("indicadores-pesada", "children")
-    ],
-    [
-        Input("data-range-pesada", "start_date"),
-        Input("data-range-pesada", "end_date"),
-        Input("tipo-dropdown-pesada", "value")
-    ]
+    [Output("grafico-pesada", "figure"), Output("indicadores-pesada", "children")],
+    [Input("data-range-pesada", "start_date"), Input("data-range-pesada", "end_date"), Input("tipo-dropdown-pesada", "value")]
 )
 def atualizar_pesada(start_date, end_date, tipos):
     return gerar_grafico_e_indicadores('PESADA', start_date, end_date, tipos)
 
-# Função de geração de gráfico + indicadores
 def gerar_grafico_e_indicadores(categoria, start_date, end_date, tipos):
     df = df_manutencao[df_manutencao['CATEGORIA'] == categoria]
     if start_date and end_date:
@@ -174,6 +158,5 @@ def gerar_grafico_e_indicadores(categoria, start_date, end_date, tipos):
 
     return fig, indicadores
 
-# Run
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)), debug=False)

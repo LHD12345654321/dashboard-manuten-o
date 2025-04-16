@@ -4,6 +4,7 @@ body {
   color: #f0f0f0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
+  padding: 0;
 }
 
 /* Títulos principais com dourado */
@@ -25,11 +26,13 @@ h2 {
 h3 {
   color: #FFD700;
   margin-bottom: 10px;
+  font-size: 20px;
 }
 
 /* Indicadores */
 #indicadores-leve p,
-#indicadores-pesada p {
+#indicadores-pesada p,
+#indicadores-geral p {
   font-size: 18px;
   color: #DDDDDD;
   margin: 5px 0;
@@ -71,7 +74,7 @@ input[type="text"] {
   border-bottom: 3px solid #FFD700 !important;
 }
 
-/* Botões (caso adicione futuramente) */
+/* Botões */
 button {
   background-color: #FFD700;
   color: #000;
@@ -81,10 +84,17 @@ button {
   font-weight: bold;
   cursor: pointer;
   transition: background 0.3s;
+  margin: 5px;
 }
 
 button:hover {
   background-color: #e6c200;
+}
+
+/* Botões de exportação */
+.export-button {
+  margin-top: 10px;
+  text-align: right;
 }
 
 /* Logo */
@@ -95,17 +105,37 @@ img.logo {
   margin: 0 auto 30px auto;
 }
 
+/* Tooltips personalizados */
+div[data-testid="tooltip"] {
+  background-color: #333 !important;
+  color: #FFD700 !important;
+  border: 1px solid #FFD700;
+}
+
+/* Container dos filtros responsivo */
+.filters-container {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
 /* Gráficos responsivos */
 @media screen and (max-width: 768px) {
   .Select-control,
   .dash-dropdown,
   .DateRangePicker {
-      width: 100% !important;
-      margin-bottom: 10px;
+    width: 100% !important;
+    margin-bottom: 10px;
   }
 
-  .dash-dropdown-container,
   .filters-container {
-      flex-direction: column;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  button {
+    width: 100%;
   }
 }
