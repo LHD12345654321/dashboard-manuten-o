@@ -85,15 +85,21 @@ def salvar_aba_preferida(aba_atual):
 def atualizar_pagina(aba):
     if aba == 'geral':
         df_agrupado = df_manutencao.groupby('ANO_MES', as_index=False).sum(numeric_only=True)
+        df_agrupado['VALOR PAGO TEXTO'] = df_agrupado['VALOR PAGO'].apply(lambda x: f"R$ {x:,.2f}")
+        fig_barras = px.bar(df_agrupado, x='ANO_MES', y='VALOR PAGO', text='VALOR PAGO TEXTO',
+                            title="Evolução Mensal", template='plotly_dark')
+        fig_barras.update_traces(textposition='outside')
+        fig_barras.update_layout(title_x=0.5)
+
+        df_tipo = df_manutencao.groupby('TIPO', as_index=False)['VALOR PAGO'].sum()
+        df_tipo['VALOR PAGO TEXTO'] = df_tipo['VALOR PAGO'].apply(lambda x: f"R$ {x:,.2f}")
+        fig_pizza = px.pie(df_tipo, names='TIPO', values='VALOR PAGO', title="Distribuição por Tipo",
+                           template='plotly_dark', hole=0.3)
+        fig_pizza.update_layout(title_x=0.5)
+
         return html.Div([
-            dcc.Graph(
-                figure=px.pie(df_manutencao, names='TIPO', values='VALOR PAGO', title="Distribuição por Tipo")
-                .update_layout(template='plotly_dark', title_x=0.5)
-            ),
-            dcc.Graph(
-                figure=px.bar(df_agrupado, x='ANO_MES', y='VALOR PAGO', title="Evolução Mensal")
-                .update_layout(template='plotly_dark', title_x=0.5)
-            )
+            dcc.Graph(figure=fig_pizza),
+            dcc.Graph(figure=fig_barras)
         ])
 
     elif aba in ['leve', 'pesada']:
@@ -156,8 +162,9 @@ def gerar_grafico_e_indicadores(categoria, start_date, end_date, tipos):
 
     df_agrupado = df.groupby('MODELO/PLACA', as_index=False)['VALOR PAGO'].sum()
     df_agrupado = df_agrupado.sort_values(by='VALOR PAGO', ascending=False)
+    df_agrupado['VALOR PAGO TEXTO'] = df_agrupado['VALOR PAGO'].apply(lambda x: f"R$ {x:,.2f}")
 
-    fig = px.bar(df_agrupado, x='MODELO/PLACA', y='VALOR PAGO', text='VALOR PAGO',
+    fig = px.bar(df_agrupado, x='MODELO/PLACA', y='VALOR PAGO', text='VALOR PAGO TEXTO',
                  title=f"VEÍCULOS - Gastos por Veículo ({categoria})", template="plotly_dark")
     fig.update_traces(textposition='outside')
     fig.update_layout(
